@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+						http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="Preston Brown">
+        <createTable tableName="track_stream">
+            <column name="id" type="integer"
+                    autoIncrement="true"
+                    remarks="The unique ID of this row.">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar(20)"
+                    remarks="The type of this stream."/>
+            <column name="created" type="timestamp"/>
+            <column name="total" type="integer"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="Preston Brown">
+        <ext:createAuditTable tableName="track_stream"/>
+    </changeSet>
+
+</databaseChangeLog>

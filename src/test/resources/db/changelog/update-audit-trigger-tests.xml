@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+						http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="Preston Brown">
+        <createTable tableName="test_tbl">
+            <column name="id" type="integer" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="text_col" type="varchar(20)"/>
+            <column name="int_col" type="integer"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="Preston Brown">
+        <ext:createAuditTable tableName="test_tbl"/>
+    </changeSet>
+
+    <changeSet id="3" author="Preston Brown">
+        <addColumn tableName="test_tbl">
+            <column name="bool_col" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="4" author="Preston Brown">
+        <addColumn tableName="test_tbl_audit">
+            <column name="bool_col" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="5" author="Preston Brown">
+        <ext:updateAuditTrigger tableName="test_tbl"/>
+    </changeSet>
+
+</databaseChangeLog>

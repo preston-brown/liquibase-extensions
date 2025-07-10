@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+						http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1" author="Preston Brown">
+        <createTable tableName="table_1">
+            <column name="id" type="integer"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar(20)"/>
+            <column name="created" type="timestamp"/>
+            <column name="updated" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="Preston Brown">
+        <ext:createTimestampTriggers tableName="table_1"/>
+    </changeSet>
+
+    <changeSet id="3" author="Preston Brown">
+        <createTable tableName="table_2">
+            <column name="id" type="integer"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar(20)"/>
+            <column name="created_ts" type="timestamp"/>
+            <column name="updated_ts" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="Preston Brown">
+        <ext:createTimestampTriggers tableName="table_2" createdColumnName="created_ts" updatedColumnName="updated_ts"/>
+    </changeSet>
+
+    <changeSet id="5" author="Preston Brown">
+        <createTable tableName="table_3">
+            <column name="id" type="integer"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar(20)"/>
+            <column name="created" type="timestamp"/>
+            <column name="updated" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="Preston Brown">
+        <ext:createTimestampTriggers tableName="table_3" includeCreatedTrigger="false"/>
+    </changeSet>
+
+
+    <changeSet id="7" author="Preston Brown">
+        <createTable tableName="table_4">
+            <column name="id" type="integer"
+                    autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar(20)"/>
+            <column name="created" type="timestamp"/>
+            <column name="updated" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="8" author="Preston Brown">
+        <ext:createTimestampTriggers tableName="table_4" includeUpdatedTrigger="false"/>
+    </changeSet>
+
+
+
+</databaseChangeLog>
