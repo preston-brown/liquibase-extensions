@@ -8,8 +8,8 @@ import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.core.Table;
-import walg.liquibase.plugins.shared.DatabaseWrapper;
 import walg.liquibase.plugins.audit.Names;
+import walg.liquibase.plugins.shared.DatabaseWrapper;
 
 import java.util.ArrayList;
 import java.util.List;

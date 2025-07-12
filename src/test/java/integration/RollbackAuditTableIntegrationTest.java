@@ -17,7 +17,6 @@ import java.sql.*;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RollbackAuditTableIntegrationTest {
 
@@ -82,7 +81,7 @@ public class RollbackAuditTableIntegrationTest {
 
 
     private void insertRow() throws SQLException {
-        String sql = "INSERT INTO track_stream (type, created, total) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO track_stream (type, created_at, total) VALUES (?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, "some-type");

@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
 						http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="1" author="Preston Brown">
+    <changeSet id="1" author="Me">
         <createTable tableName="test_tbl">
             <column name="id" type="integer" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -15,23 +15,23 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="Preston Brown">
+    <changeSet id="2" author="Me">
         <ext:createAuditTable tableName="test_tbl"/>
     </changeSet>
 
-    <changeSet id="3" author="Preston Brown">
+    <changeSet id="3" author="Me">
         <addColumn tableName="test_tbl">
             <column name="bool_col" type="boolean"/>
         </addColumn>
     </changeSet>
 
-    <changeSet id="4" author="Preston Brown">
+    <changeSet id="4" author="Me">
         <addColumn tableName="test_tbl_audit">
             <column name="bool_col" type="boolean"/>
         </addColumn>
     </changeSet>
 
-    <changeSet id="5" author="Preston Brown">
+    <changeSet id="5" author="Me">
         <ext:updateAuditTrigger tableName="test_tbl"/>
     </changeSet>
 

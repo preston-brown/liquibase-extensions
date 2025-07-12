@@ -5,7 +5,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
 						http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="1" author="Preston Brown">
+    <changeSet id="1" author="Me">
         <createTable tableName="track_stream">
             <column name="id" type="integer"
                     autoIncrement="true"
@@ -14,12 +14,12 @@
             </column>
             <column name="type" type="varchar(20)"
                     remarks="The type of this stream."/>
-            <column name="created" type="timestamp"/>
+            <column name="created_at" type="timestamp"/>
             <column name="total" type="integer"/>
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="Preston Brown">
+    <changeSet id="2" author="Me">
         <ext:createAuditTable tableName="track_stream"/>
     </changeSet>
 

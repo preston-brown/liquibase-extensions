@@ -57,14 +57,8 @@ public class CsvFile {
         return rows;
     }
 
-    /**
-     * Get the value in a specific column from all rows. The column is specified by providing the header value.
-     * @param header
-     * @return
-     */
-
-    public List<String> getValues(String header) {
-        int columnIndex = getHeaders().indexOf(header);
-        return getRows().stream().map(row -> row.get(columnIndex)).toList();
+    public int size() {
+        return getRows().size();
     }
+
 }

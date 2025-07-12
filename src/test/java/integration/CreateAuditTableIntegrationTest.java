@@ -62,7 +62,6 @@ public class CreateAuditTableIntegrationTest {
             rs.next();
             assertEquals(1, rs.getInt(1));
         }
-
     }
 
     @Test
@@ -83,7 +82,7 @@ public class CreateAuditTableIntegrationTest {
             assertEquals("INSERT", rs.getString("audit_action"));
             assertEquals("testuser", rs.getString("audit_user"));
             assertEquals("some-type", rs.getString("type"));
-            assertEquals(TIMESTAMP, rs.getTimestamp("created"));
+            assertEquals(TIMESTAMP, rs.getTimestamp("created_at"));
             assertEquals(100, rs.getInt("total"));
         }
     }
@@ -93,7 +92,7 @@ public class CreateAuditTableIntegrationTest {
         // When
         insertRow();
         deleteAllRows("track_stream_audit");
-        String sql = "update track_stream set type = ?, created = ?, total = ?";
+        String sql = "update track_stream set type = ?, created_at = ?, total = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, "some-other-type");
@@ -115,7 +114,7 @@ public class CreateAuditTableIntegrationTest {
             assertEquals("UPDATE", rs.getString("audit_action"));
             assertEquals("testuser", rs.getString("audit_user"));
             assertEquals("some-other-type", rs.getString("type"));
-            assertEquals(TIMESTAMP2, rs.getTimestamp("created"));
+            assertEquals(TIMESTAMP2, rs.getTimestamp("created_at"));
             assertEquals(101, rs.getInt("total"));
         }
     }
@@ -140,14 +139,14 @@ public class CreateAuditTableIntegrationTest {
             assertEquals("DELETE", rs.getString("audit_action"));
             assertEquals("testuser", rs.getString("audit_user"));
             assertEquals("some-type", rs.getString("type"));
-            assertEquals(TIMESTAMP, rs.getTimestamp("created"));
+            assertEquals(TIMESTAMP, rs.getTimestamp("created_at"));
             assertEquals(100, rs.getInt("total"));
         }
     }
 
 
     private void insertRow() throws SQLException {
-        String sql = "INSERT INTO track_stream (type, created, total) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO track_stream (type, created_at, total) VALUES (?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, "some-type");

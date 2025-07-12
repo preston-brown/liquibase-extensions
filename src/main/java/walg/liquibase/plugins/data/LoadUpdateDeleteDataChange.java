@@ -14,7 +14,11 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.statement.core.UpdateStatement;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static liquibase.change.ChangeParameterMetaData.ALL;
 
@@ -82,9 +86,22 @@ public class LoadUpdateDeleteDataChange extends AbstractChange {
         return "Synced table %s with file %s".formatted(tableName, file);
     }
 
+    /**
+     * Returns all the SQL statements necessary to synchronize an existing database table with the contents of a
+     * CSV file. Statements returned will include inserts, updates, and deletes.
+     * <p>
+     * If the CSV file is empty, don't return any statements. In that case we don't want to perform any updates. The
+     * alternative would be to delete every row in the table, and that seems like a bad assumption to make.
+     *
+     * @param database the database to operate against
+     * @return an array of SqlStatement objects
+     */
     @Override
     public SqlStatement[] generateStatements(Database database) {
         CsvFile csvFile = new CsvFile(file);
+        if (csvFile.size() == 0) {
+            return new SqlStatement[0];
+        }
         List<SqlStatement> sqlStatements = new ArrayList<>();
         sqlStatements.add(buildDeleteStatement(csvFile));
         sqlStatements.addAll(buildUpsertStatements(csvFile, database));
@@ -93,35 +110,46 @@ public class LoadUpdateDeleteDataChange extends AbstractChange {
 
     /**
      * Create a delete statement that will delete every row whose primary key is not in the provided file.
-     * This will work fine for small files.
-     * @param csvFile
-     * @return
+     *
+     * @param csvFile CSV file containing the data to load
+     * @return a SqlStatement that will delete all the rows in the table not represented in the CSV file
      */
     private SqlStatement buildDeleteStatement(CsvFile csvFile) {
         DeleteStatement deleteStatement = new DeleteStatement(null, null, tableName);
-        List<String> valuesToRetain = csvFile.getValues(primaryKey);
-        String inList = String.join(",", Collections.nCopies(valuesToRetain.size(), ":value"));
-        deleteStatement.setWhere("%s NOT IN (%s)".formatted(primaryKey, inList));
-        for (String value : valuesToRetain) {
-            deleteStatement.addWhereParameter(value);
+        List<String> headers = csvFile.getHeaders();
+        List<Integer> pkIndexes = Stream.of(primaryKey.split(",")).map(headers::indexOf).toList();
+        String primaryKeys = pkIndexes.stream().map(headers::get).collect(Collectors.joining(", ", "(", ")"));
+        // A string that looks like this (?, ?, ?) containing a ? for every primary key field
+        String inListItem = Collections.nCopies(pkIndexes.size(), "?").stream().collect(Collectors.joining(", ", "(", ")"));
+        // We need one (?, ?, ?) for every row in the file
+        String inListItems = Collections.nCopies(csvFile.size(), inListItem).stream().collect(Collectors.joining(", ", "(", ")"));
+        String whereClause = primaryKeys + " not in " + inListItems;
+        deleteStatement.setWhere(whereClause);
+        // Add parameters to the query to account for all the placeholders added above
+        for (List<String> row : csvFile.getRows()) {
+            for (int index : pkIndexes) {
+                deleteStatement.addWhereParameter(row.get(index));
+            }
         }
         return deleteStatement;
     }
 
     /**
-     * Build an upsert statement for every row in the provided file.
-     * @param csvFile
-     * @param database
+     * Build an upsert statement for every row in the provided file. An upsert statement executes an update statement
+     * first. If the update had no impact, it then executes an insert statement.
+     *
+     * @param csvFile the CSV file to load data from
+     * @param database the database to operate in
      * @return a list of SqlStatement objects
      */
     private List<SqlStatement> buildUpsertStatements(CsvFile csvFile, Database database) {
         List<SqlStatement> result = new ArrayList<>();
         List<String> headers = csvFile.getHeaders();
-        int primaryKeyIndex = headers.indexOf(primaryKey);
+        List<String> primaryKeyColumnNames = List.of(primaryKey.split(","));
+        List<Integer> primaryKeyColumnIndexes = primaryKeyColumnNames.stream().map(headers::indexOf).toList();
         List<List<String>> rows = csvFile.getRows();
         for (List<String> row : rows) {
-            String primaryKeyValue = row.get(primaryKeyIndex);
-            SqlStatement updateStatement = buildUpdateStatement(headers, row, primaryKeyIndex, primaryKeyValue);
+            SqlStatement updateStatement = buildUpdateStatement(headers, row, primaryKeyColumnIndexes);
             SqlStatement insertStatement = buildInsertStatement(headers, row);
             SqlStatement upsertStatement = buildUpsertStatement(updateStatement, insertStatement, database);
             result.add(upsertStatement);
@@ -130,36 +158,41 @@ public class LoadUpdateDeleteDataChange extends AbstractChange {
     }
 
     /**
-     * Create an update statement.
-     * @param headers
-     * @param values
-     * @param primaryKeyIndex
-     * @param primaryKeyValue
+     * Create an update statement putting the key columns in the where clause and the other columns in the update clause.
+     *
+     * @param columnNames the columnNames in the table being updated
+     * @param values the values from one row of the CSV file, in the same order as the values in columnNames
+     * @param pkIndexes the locations of the primary key columns in the columnNames list
      * @return a SqlStatement that updates a single row.
      */
-    private SqlStatement buildUpdateStatement(List<String> headers, List<String> values, int primaryKeyIndex, String primaryKeyValue) {
+    private SqlStatement buildUpdateStatement(List<String> columnNames, List<String> values, List<Integer> pkIndexes) {
         UpdateStatement result = new UpdateStatement(null, null, tableName);
-        for (int i = 0; i < headers.size(); i++) {
-            if (i != primaryKeyIndex) {
-                result.addNewColumnValue(headers.get(i), values.get(i));
+        List<String> whereConditions = new ArrayList<>();
+        for (int i = 0; i < columnNames.size(); i++) {
+            String columnName = columnNames.get(i);
+            String value = values.get(i);
+            if (pkIndexes.contains(i)) {
+                whereConditions.add(columnName + " = :value");
+                result.addWhereParameter(value);
+            } else {
+                result.addNewColumnValue(columnName, value);
             }
         }
-        result.setWhereClause(":name = :value");
-        result.addWhereColumnName(primaryKey);
-        result.addWhereParameter(primaryKeyValue);
+        result.setWhereClause(String.join(" and ", whereConditions));
         return result;
     }
 
     /**
      * Build a statement to insert a new row.
-     * @param headers
-     * @param values
+     *
+     * @param columnNames the names of the columns in the table we are inserting into
+     * @param values the values to insert
      * @return An SqlStatement to insert a single row.
      */
-    private SqlStatement buildInsertStatement(List<String> headers, List<String> values) {
+    private SqlStatement buildInsertStatement(List<String> columnNames, List<String> values) {
         InsertStatement result = new InsertStatement(null, null, tableName);
-        for (int i = 0; i < headers.size(); i++) {
-            result.addColumnValue(headers.get(i), values.get(i));
+        for (int i = 0; i < columnNames.size(); i++) {
+            result.addColumnValue(columnNames.get(i), values.get(i));
         }
         return result;
     }
@@ -167,10 +200,11 @@ public class LoadUpdateDeleteDataChange extends AbstractChange {
     /**
      * Combine an update statement and an insert statement into a statement that will only attempt to insert a new row
      * if the primary key doesn't yet exist. This lets the database make the insert/update decision instead of trying
-     * to do it here in the plugin. 
-     * @param updateStatement
-     * @param insertStatement
-     * @param database
+     * to do it here in the plugin.
+     *
+     * @param updateStatement an update statement
+     * @param insertStatement an insert statement
+     * @param database the database we are operating in
      * @return a SqlStatement that contains a bit of PL/pgSQL to simulate an upsert statement.
      */
     private SqlStatement buildUpsertStatement(SqlStatement updateStatement, SqlStatement insertStatement, Database database) {
@@ -182,8 +216,9 @@ public class LoadUpdateDeleteDataChange extends AbstractChange {
 
     /**
      * Given a SqlStatement, extract the underlying SQL as a String.
-     * @param sqlStatement
-     * @param database
+     *
+     * @param sqlStatement Liquibase SqlStatment
+     * @param database the current database
      * @return The SQL that this SqlStatement would execute.
      */
     private String convertToSql(SqlStatement sqlStatement, Database database) {
@@ -207,15 +242,9 @@ public class LoadUpdateDeleteDataChange extends AbstractChange {
         if (tableName == null || tableName.isEmpty()) {
             errors.addError("table is required.");
         }
-        if (primaryKey.indexOf(',') != -1) {
-            errors.addError("primaryKey must be a single column. Composite keys are not supported.");
-        }
         CsvFile csvFile = new CsvFile(file);
         if (csvFile.getRows().size() > 100) {
             errors.addError("The file must contain 100 or fewer records.");
-        }
-        if (!csvFile.getHeaders().contains(primaryKey)) {
-            errors.addError("%s not found in file.".formatted(primaryKey));
         }
         return errors;
     }

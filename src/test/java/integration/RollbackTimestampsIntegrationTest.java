@@ -50,15 +50,15 @@ public class RollbackTimestampsIntegrationTest {
     void timestampsNotSetAfterRollback() throws Exception {
         // When
         deleteAllRows();
-        liquibase.rollback(1, "");
+        liquibase.rollback(7, "");
         insertRow();
 
         // Then
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT created, updated FROM table_1")) {
+             ResultSet rs = stmt.executeQuery("SELECT created_at, updated_at FROM table_1")) {
             rs.next();
-            assertNull(rs.getTimestamp("created"));
-            assertNull(rs.getTimestamp("updated"));
+            assertNull(rs.getTimestamp("created_at"));
+            assertNull(rs.getTimestamp("updated_at"));
         }
 
         // When
@@ -67,12 +67,12 @@ public class RollbackTimestampsIntegrationTest {
         insertRow();
 
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT created, updated FROM table_1")) {
+             ResultSet rs = stmt.executeQuery("SELECT created_at, updated_at FROM table_1")) {
             rs.next();
-            assertNotNull(rs.getTimestamp("created"));
-            assertNotNull(rs.getTimestamp("updated"));
-            Instant created = rs.getTimestamp("created").toInstant();
-            Instant updated = rs.getTimestamp("updated").toInstant();
+            assertNotNull(rs.getTimestamp("created_at"));
+            assertNotNull(rs.getTimestamp("updated_at"));
+            Instant created = rs.getTimestamp("created_at").toInstant();
+            Instant updated = rs.getTimestamp("updated_at").toInstant();
             long difference = Math.abs(ChronoUnit.SECONDS.between(created, Instant.now()));
             assertTrue(difference < 5);
             difference = Math.abs(ChronoUnit.SECONDS.between(updated, Instant.now()));

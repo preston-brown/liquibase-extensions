@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+						http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="1a" author="Me" context="init">
+        <createTable tableName="simple_key_tbl">
+            <column name="key" type="integer">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="value" type="varchar(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1b" author="Me" runAlways="true" context="simple-test-1">
+        <ext:loadUpdateDeleteData tableName="simple_key_tbl" file="db/changelog/data/simple-test-1.csv" primaryKey="key"/>
+    </changeSet>
+
+    <changeSet id="1c" author="Me" runAlways="true" context="simple-test-2">
+        <ext:loadUpdateDeleteData tableName="simple_key_tbl" file="db/changelog/data/simple-test-2.csv" primaryKey="key"/>
+    </changeSet>
+
+    <changeSet id="1d" author="Me" runAlways="true" context="simple-test-3">
+        <ext:loadUpdateDeleteData tableName="simple_key_tbl" file="db/changelog/data/simple-test-3.csv" primaryKey="key"/>
+    </changeSet>
+
+    <changeSet id="2a" author="Me" context="init">
+        <createTable tableName="composite_key_tbl">
+            <column name="key1" type="varchar(10)"/>
+            <column name="key2" type="integer"/>
+            <column name="value" type="varchar(20)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2b" author="Me" context="init">
+        <addPrimaryKey tableName="composite_key_tbl" columnNames="key1,key2" constraintName="composite_key_tbl_pkey"/>
+    </changeSet>
+
+    <changeSet id="2c" author="Me" runAlways="true" context="composite-test-1">
+        <ext:loadUpdateDeleteData tableName="composite_key_tbl" file="db/changelog/data/composite-test-1.csv" primaryKey="key1,key2"/>
+    </changeSet>
+
+    <changeSet id="2d" author="Me" runAlways="true" context="composite-test-2">
+        <ext:loadUpdateDeleteData tableName="composite_key_tbl" file="db/changelog/data/composite-test-2.csv" primaryKey="key1,key2"/>
+    </changeSet>
+
+    <changeSet id="2e" author="Me" runAlways="true" context="composite-test-3">
+        <ext:loadUpdateDeleteData tableName="composite_key_tbl" file="db/changelog/data/composite-test-3.csv" primaryKey="key1,key2"/>
+    </changeSet>
+
+</databaseChangeLog>

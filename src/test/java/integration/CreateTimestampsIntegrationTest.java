@@ -61,16 +61,16 @@ public class CreateTimestampsIntegrationTest {
 
         // Then
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT created, updated FROM table_1")) {
+             ResultSet rs = stmt.executeQuery("SELECT created_at, updated_at FROM table_1")) {
             rs.next();
-            assertNotNull(rs.getTimestamp("created"));
-            assertNotNull(rs.getTimestamp("updated"));
+            assertNotNull(rs.getTimestamp("created_at"));
+            assertNotNull(rs.getTimestamp("updated_at"));
 
-            Instant created = rs.getTimestamp("created").toInstant();
+            Instant created = rs.getTimestamp("created_at").toInstant();
             long difference = Math.abs(ChronoUnit.SECONDS.between(created, Instant.now()));
             assertTrue(difference < 5);
 
-            Instant updated = rs.getTimestamp("updated").toInstant();
+            Instant updated = rs.getTimestamp("updated_at").toInstant();
             difference = Math.abs(ChronoUnit.SECONDS.between(updated, Instant.now()));
             assertTrue(difference < 5);
         }
@@ -107,10 +107,10 @@ public class CreateTimestampsIntegrationTest {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM table_3")) {
             rs.next();
-            assertNull(rs.getTimestamp("created"));
-            assertNotNull(rs.getTimestamp("updated"));
+            assertNull(rs.getTimestamp("created_at"));
+            assertNotNull(rs.getTimestamp("updated_at"));
 
-            Instant updated = rs.getTimestamp("updated").toInstant();
+            Instant updated = rs.getTimestamp("updated_at").toInstant();
             long difference = Math.abs(ChronoUnit.SECONDS.between(updated, Instant.now()));
             assertTrue(difference < 5);
         }
@@ -125,10 +125,10 @@ public class CreateTimestampsIntegrationTest {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM table_4")) {
             rs.next();
-            assertNotNull(rs.getTimestamp("created"));
-            assertNull(rs.getTimestamp("updated"));
+            assertNotNull(rs.getTimestamp("created_at"));
+            assertNull(rs.getTimestamp("updated_at"));
 
-            Instant created = rs.getTimestamp("created").toInstant();
+            Instant created = rs.getTimestamp("created_at").toInstant();
             long difference = Math.abs(ChronoUnit.SECONDS.between(created, Instant.now()));
             assertTrue(difference < 5);
         }
